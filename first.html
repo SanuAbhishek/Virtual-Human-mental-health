@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>careTrace - Healthy Care Assistant</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Background image styles */
+        body {
+            position: relative;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 248, 255, 0.95) 100%);
+        }
+        
+        /* Animated GIF background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://img.freepik.com/premium-photo/neurofeedback-technology-mental-health-therapy_1022456-160253.jpg?semt=ais_user_personalization&w=740&q=80'); /* Replace with your GIF URL */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            opacity: 0.8; /* Make GIF lighter */
+            z-index: -1;
+            filter: brightness(1.4) contrast(0.9); /* Further lighten the GIF */
+        }
+        
+        /* Fallback in case GIF doesn't load */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(240, 248, 255, 0.6) 0%, rgba(255, 255, 255, 0.7) 100%);
+            z-index: -2;
+        }
+        
+        /* Make all content boxes semi-transparent */
+        .navbar {
+            background: rgba(255, 255, 255, 0.85) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .hero {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        
+        .section {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .chat-container,
+        .questionnaire-container,
+        .face-container,
+        .resources-grid,
+        .chat-analysis,
+        .emotion-results,
+        .recommendation-card,
+        .analysis-card,
+        .resource-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        
+        footer {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        /* Make buttons semi-transparent too */
+        .cta-button,
+        .submit-btn,
+        #sendButton,
+        #startCamera,
+        #captureEmotion,
+        #stopCamera,
+        .quick-response {
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        
+        .cta-button {
+            background: rgba(59, 130, 246, 0.85) !important;
+        }
+        
+        .submit-btn,
+        #sendButton,
+        #startCamera,
+        #captureEmotion,
+        #stopCamera {
+            background: rgba(59, 130, 246, 0.8) !important;
+        }
+        
+        .quick-response {
+            background: rgba(241, 245, 249, 0.8) !important;
+        }
+        
+        /* Ensure content is readable */
+        .navbar,
+        .container,
+        .hero,
+        footer,
+        .section {
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Text shadows for better readability */
+        h1, h2, h3, h4, h5, h6 {
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+        }
+        
+        .hero-content h1 {
+            text-shadow: 0 2px 4px rgba(255, 255, 255, 0.9);
+        }
+        
+        .hero-content p {
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Progress bars with transparency */
+        .progress-fill,
+        .stress-fill,
+        .sadness-fill,
+        .neutral-fill,
+        .metric-fill {
+            opacity: 0.9;
+        }
+        
+        /* Loading indicator for background */
+        @keyframes backgroundLoading {
+            0% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.5; }
+        }
+        
+        /* body.loading::before {
+            animation: backgroundLoading 2s infinite;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        } */
+        
+        /* If GIF doesn't load, show a fallback message */
+        .gif-fallback {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: -1;
+            opacity: 0.6;
+        }
+    </style>
+    <script>
+    
+document.addEventListener('DOMContentLoaded', function () {
+    const bgImage = new Image();
+    const gifUrl = 'data:image/jpeg;base64,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'; // Replace with your GIF URL
+
+    bgImage.src = gifUrl;
+
+    bgImage.onload = function () {
+        console.log('Background GIF loaded successfully');
+
+        document.body.style.backgroundImage = `url('${gifUrl}')`;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundRepeat = 'no-repeat';
+        document.body.style.backgroundPosition = 'center center';
+        document.body.style.minHeight = '100vh';
+
+        document.body.classList.remove('loading');
+    };
+
+    bgImage.onerror = function () {
+        console.log('Failed to load background GIF, using fallback');
+
+        document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        document.body.style.minHeight = '100vh';
+
+        document.body.classList.remove('loading');
+    };
+});
+</script>
+
+    </script>
+</head>
+<body class="loading">
+    <!-- Fallback in case GIF doesn't load -->
+    <div class="gif-fallback" id="gifFallback">
+        <div style="text-align: center; padding: 20px;">
+            <i class="fas fa-image fa-3x" style="margin-bottom: 20px;"></i>
+            <p>...</p>  
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <span>careTrace</span>
+            </div>
+            <div class="nav-links">
+                <a href="#" class="active"><i class="fas fa-home"></i> Home</a>
+                <a href="#chat"><i class="fas fa-comment"></i> AI Assistant</a>
+                <a href="#questionnaire"><i class="fas fa-clipboard-list"></i> Questionnaire</a>
+                <a href="#face-analysis"><i class="fas fa-smile"></i> Mood Analysis</a>
+                <a href="#resources"><i class="fas fa-book"></i> Resources</a>
+            </div>
+            <div class="language-selector">
+                <select id="languageSelect">
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="hi">हिन्दी</option>
+                    <option value="zh">中文</option>
+                    <option value="ar">العربية</option>
+                </select>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <a 
+    href="historyChat.html"
+    class="cta-button"
+    style="margin-top: 15px; display: inline-block;"
+>
+    Assistive Chat <i class="fas fa-comments"></i>
+</a>
+
+            <h1>Your AI Healthy Care Companion</h1>
+            <p>24/7 support for stress, anxiety, and depression with personalized guidance</p>
+            <a 
+                href="https://x.convai.com/?xpid=fe06faa2-c641-4634-8a68-5d9cca767af8&type=public"
+                class="cta-button"
+                target="_blank"
+            >
+                Start Talking with Ai Virtual Human Assistant <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        <div class="hero-image">
+            <div class="ai-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Chatbot Section -->
+        <section id="chat" class="section">
+            <h2><i class="fas fa-comments"></i> AI Assistant Chat</h2>
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="chat-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="chat-info">
+                        <h3>CareTrace Assistant</h3>
+                        <p>Online • Professional Healthy Care Support</p>
+                    </div>
+                    <div class="chat-status" id="chatStatus">
+                        <span class="status-dot"></span>
+                        Analyzing...
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message ai-message">
+                        <div class="message-content">
+                            Hello! I'm careTrace, your AI healthy care assistant. I'm here to listen, support, and guide you through difficult times. How are you feeling today?
+                        </div>
+                        <div class="message-time">Just now</div>
+                    </div>
+                </div>
+                
+                <div class="chat-input-area">
+                    <div class="input-wrapper">
+                        <input type="text" id="userInput" placeholder="Type your message here..." 
+                               onkeypress="handleKeyPress(event)">
+                        <button id="sendButton" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="quick-responses">
+                        <button class="quick-response" onclick="setQuickResponse('I feel anxious today')">
+                            I feel anxious today
+                        </button>
+                        <button class="quick-response" onclick="setQuickResponse('I\'m feeling depressed')">
+                            I'm feeling depressed
+                        </button>
+                        <button class="quick-response" onclick="setQuickResponse('I need coping strategies')">
+                            I need coping strategies
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-analysis">
+                <h4><i class="fas fa-chart-line"></i> Mood Analysis</h4>
+                <div class="analysis-grid">
+                    <div class="analysis-card">
+                        <div class="analysis-title">Current Mood Level</div>
+                        <div class="analysis-value" id="moodLevel">Neutral</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="moodProgress"></div>
+                        </div>
+                    </div>
+                    <div class="analysis-card">
+                        <div class="analysis-title">Stress Indicator</div>
+                        <div class="analysis-value" id="stressLevel">Moderate</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill stress-fill" id="stressProgress"></div>
+                        </div>
+                    </div>
+                    <div class="analysis-card">
+                        <div class="analysis-title">Conversation Topics</div>
+                        <div class="analysis-value" id="topics">Anxiety, Stress</div>
+                        <div class="topics-list" id="topicsList">
+                            <span class="topic-tag">Anxiety</span>
+                            <span class="topic-tag">Stress</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Questionnaire Section -->
+        <section id="questionnaire" class="section">
+            <h2><i class="fas fa-clipboard-check"></i> Healthy Care Assessment</h2>
+            <div class="questionnaire-container">
+                <p class="section-description">
+                    This research-based questionnaire helps identify areas where you might need support. 
+                    Your answers will help tailor our assistance to your specific needs.
+                </p>
+                <a href="questionnaire.html" class="questionnaire-link">
+                    <i class="fas fa-external-link-alt"></i> 
+                    Take Full Assessment
+                </a>
+                
+                <div class="quick-assessment">
+                    <h3>Quick Self-Check</h3>
+                    <div class="question-item">
+                        <p>Over the last 2 weeks, how often have you felt little interest or pleasure in doing things?</p>
+                        <div class="option-group">
+                            <label class="option">
+                                <input type="radio" name="q1" value="0">
+                                <span>Not at all</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="q1" value="1">
+                                <span>Several days</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="q1" value="2">
+                                <span>More than half the days</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="q1" value="3">
+                                <span>Nearly every day</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="question-item">
+                        <p>How often have you felt nervous, anxious, or on edge?</p>
+                        <div class="option-group">
+                            <label class="option">
+                                <input type="radio" name="q2" value="0">
+                                <span>Not at all</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="q2" value="1">
+                                <span>Several days</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="q2" value="2">
+                                <span>More than half the days</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="q2" value="3">
+                                <span>Nearly every day</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button 
+                        class="submit-btn"
+                        onclick="calculateQuickAssessment(); window.location.href='data.html';"
+                    >
+                        Analyze My Responses
+                    </button>
+                    
+                    <div id="assessmentResult" class="result-card hidden">
+                        <h4>Your Assessment Result</h4>
+                        <div id="resultContent"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Face Recognition Section -->
+        <section id="face-analysis" class="section">
+            <h2><i class="fas fa-user-circle"></i> Facial Expression Analysis</h2>
+            <div class="face-container">
+                <div class="camera-section">
+                    <div class="camera-view">
+                        <video id="video" width="640" height="480" autoplay></video>
+                        <canvas id="canvas" width="640" height="480"></canvas>
+                    </div>
+                    <div class="camera-controls">
+                        <button id="startCamera" onclick="startCamera()">
+                            <i class="fas fa-camera"></i> Start Camera
+                        </button>
+                        <button id="captureEmotion" onclick="captureEmotion()" disabled>
+                            <i class="fas fa-smile"></i> Analyze Emotion
+                        </button>
+                        <button id="stopCamera" onclick="stopCamera()" disabled>
+                            <i class="fas fa-stop"></i> Stop Camera
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="emotion-results">
+                    <h3>Emotion Analysis Results</h3>
+                    <div class="emotion-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Happiness</div>
+                            <div class="metric-value" id="happiness">0%</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill" id="happinessBar"></div>
+                            </div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Sadness</div>
+                            <div class="metric-value" id="sadness">0%</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill sadness-fill" id="sadnessBar"></div>
+                            </div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Stress (Estimated)</div>
+                            <div class="metric-value" id="stress">0%</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill stress-fill" id="stressBar"></div>
+                            </div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Neutral</div>
+                            <div class="metric-value" id="neutral">0%</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill neutral-fill" id="neutralBar"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-card">
+                        <h4><i class="fas fa-lightbulb"></i> Personalized Recommendations</h4>
+                        <div id="faceRecommendations">
+                            <p>Start camera and analyze your facial expression to get personalized recommendations.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resources Section -->
+        <section id="resources" class="section">
+            <h2><i class="fas fa-hands-helping"></i> Resources & Support</h2>
+            <div class="resources-grid">
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-phone-alt"></i>
+                    </div>
+                    <h3>Crisis Helplines</h3>
+                    <ul>
+                        <li>National Suicide Prevention: 988</li>
+                        <li>Crisis Text Line: Text HOME to 741741</li>
+                        <li>Veterans Crisis Line: 800-273-8255</li>
+                    </ul>
+                </div>
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Mindfulness Exercises</h3>
+                    <ul>
+                        <li>5-minute breathing exercise</li>
+                        <li>Progressive muscle relaxation</li>
+                        <li>Guided meditation sessions</li>
+                    </ul>
+                </div>
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-book-medical"></i>
+                    </div>
+                    <h3>Self-Help Materials</h3>
+                    <ul>
+                        <li>Cognitive Behavioral Therapy exercises</li>
+                        <li>Mood tracking worksheets</li>
+                        <li>Coping strategy guides</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p><strong>Important Note:</strong> This AI assistant is not a replacement for professional medical advice. 
+            If you're in crisis, please contact emergency services or a healthcare professional immediately.</p>
+            <p class="disclaimer">AI responses are generated and should be used for informational purposes only.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="script.js"></script>
+    <script src="face-detection.js"></script>
+    <script src="chatbot.js"></script>
+</body>
+</html>
