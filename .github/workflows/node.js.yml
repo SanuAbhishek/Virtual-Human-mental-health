@@ -2,9 +2,11 @@ name: Node.js CI
 
 on:
 push:
-branches: ["main"]
+branches:
+- main
 pull_request:
-branches: ["main"]
+branches:
+- main
 
 jobs:
 build:
@@ -13,10 +15,10 @@ runs-on: ubuntu-latest
 ```
 strategy:
   matrix:
-    node-version: [18.x, 20.x]
+    node-version: [18.x, 20.x, 22.x]
 
 steps:
-  - name: Checkout Repository
+  - name: Checkout repository
     uses: actions/checkout@v4
 
   - name: Setup Node.js
@@ -25,12 +27,12 @@ steps:
       node-version: ${{ matrix.node-version }}
       cache: npm
 
-  - name: Install Dependencies
+  - name: Install dependencies
     run: npm ci
 
-  - name: Build Project
+  - name: Build project
     run: npm run build --if-present
 
-  - name: Run Tests
+  - name: Run tests
     run: npm test --if-present
 ```
